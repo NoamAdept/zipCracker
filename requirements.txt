@@ -1,0 +1,5 @@
+waitress
+termcolor
+pyfiglet
+pypasswords
+wget

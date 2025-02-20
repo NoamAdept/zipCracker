@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZIP Password Cracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    /* Global Styles */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #0D0D0D;
+      color: #EAEAEA;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: #1C1C1C;
+      padding: 30px;
+      margin-top: 30px;
+      box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+      border-radius: 15px;
+      text-align: center;
+      width: 90%;
+      max-width: 500px;
+      animation: fadeIn 1s ease-in-out;
+    }
+    h2 {
+      color: #00CFFF;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 600;
+      text-align: left;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #2A2A2A;
+      color: white;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      background: linear-gradient(45deg, #00CFFF, #007BFF);
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      background: linear-gradient(45deg, #007BFF, #00CFFF);
+      transform: scale(1.05);
+    }
+    #progress-container {
+      width: 100%;
+      background: #444;
+      border-radius: 5px;
+      margin-top: 15px;
+      overflow: hidden;
+      display: none;
+    }
+    #progress-bar {
+      height: 20px;
+      width: 0%;
+      background: linear-gradient(90deg, #007BFF, #00CFFF);
+    }
+    .verbose-output {
+      margin-top: 20px;
+      padding: 20px;
+      background: #2A2A2A;
+      border-radius: 10px;
+      text-align: left;
+      animation: slideIn 0.5s ease-in-out;
+    }
+    .verbose-message {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-left: 4px solid #00CFFF;
+    }
+    .verbose-message.welcome {
+      border-color: #00FF99;
+      font-weight: bold;
+    }
+    .verbose-message.error {
+      border-color: #FF5555;
+      color: #FF5555;
+      font-weight: bold;
+    }
+    .result {
+      margin-top: 15px;
+      padding: 10px;
+      background: #1C1C1C;
+      border-radius: 8px;
+      border: 1px solid #00CFFF;
+    }
+    .seen-files {
+      margin-top: 30px;
+      background: #1C1C1C;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: left;
+      width: 90%;
+      max-width: 500px;
+    }
+    .seen-files h3 {
+      color: #00CFFF;
+    }
+    .seen-files ul {
+      list-style: none;
+      padding: 0;
+    }
+    .seen-files li {
+      background: #2A2A2A;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  <script>
+    function startProgress() {
+      let bar = document.getElementById("progress-bar");
+      let container = document.getElementById("progress-container");
+      container.style.display = "block";
+      let width = 0;
+      let interval = setInterval(() => {
+        if (width >= 100) {
+          clearInterval(interval);
+        } else {
+          width += Math.random() * 5 + 2;
+          bar.style.width = width + "%";
+        }
+      }, 100);
+    }
+
+    function togglePasswordVisibility(passwordElement) {
+      if (passwordElement.textContent === "*****") {
+        passwordElement.textContent = passwordElement.getAttribute("data-password");
+      } else {
+        passwordElement.textContent = "*****";
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h2>Upload a ZIP File for Cracking</h2>
+    <form action="/" method="post" enctype="multipart/form-data" onsubmit="startProgress()">
+      <label for="zipfile">Choose ZIP file:</label>
+      <input type="file" name="zipfile" required>
+      <label for="info">Enter relevant personal information:</label>
+      <input type="text" name="info" placeholder="e.g., John, 1995, Fluffy, Wedding">
+      <button type="submit">Crack ZIP Password</button>
+      <div id="progress-container">
+        <div id="progress-bar"></div>
+      </div>
+    </form>
+    
+    <!-- Verbose Output Section -->
+    {% if welcome_message or message or error or password or malware_status %}
+    <div class="verbose-output">
+      {% if welcome_message %}
+      <div class="verbose-message welcome">{{ welcome_message }}</div>
+      {% endif %}
+      {% if message %}
+      <div class="verbose-message">{{ message }}</div>
+      {% endif %}
+      {% if error %}
+      <div class="verbose-message error">{{ error }}</div>
+      {% endif %}
+      {% if password %}
+      <div class="result">
+        <h3>Password Found:</h3>
+        <p>{{ password }}</p>
+      </div>
+      {% endif %}
+      {% if malware_status %}
+      <div class="result">
+        <h3>Malware Scan:</h3>
+        <p>{{ malware_status }}</p>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+  
+  <div class="seen-files">
+    <h3>Previously Processed Files</h3>
+    <ul id="seen-files-list">
+      {% for file in seen_files %}
+      <li>
+        {{ file[0] }} - Password:
+        <span class="obfuscated" data-password="{{ file[1] }}" onclick="togglePasswordVisibility(this)">*****</span>
+        <button onclick="togglePasswordVisibility(this.previousElementSibling)">👁</button>
+      </li>
+      {% endfor %}
+    </ul>
+    <form action="/clear_cache" method="post">
+      <button type="submit">Clear Cache</button>
+    </form>
+  </div>
+</body>
+</html>
+
